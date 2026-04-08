@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "anti-logout",
+	"version": "${version}",
+	"name": "Anti Logout",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"DEAMJAVA"
+	],
+	"contact": {
+		"homepage": "https://github.com/DEAMJAVA/AntiLogout",
+		"sources": "https://github.com/FabricMC/AntiLogout"
+	},
+	"license": "GPLv3",
+	"icon": "assets/anti-logout/icon.png",
+	"environment": "server",
+	"entrypoints": {
+		"main": [
+			{
+				"value": "net.deamjava.anti_logout.AntiLogout",
+				"adapter": "kotlin"
+			}
+		]
+	},
+	"mixins": [
+		"anti-logout.mixins.json"
+
+	],
+	"depends": {
+		"fabricloader": ">=0.18.6",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*",
+		"fabric-language-kotlin": "*"
+	}
+}
