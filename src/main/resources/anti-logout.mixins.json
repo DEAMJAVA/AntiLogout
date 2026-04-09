@@ -6,8 +6,7 @@
 		"MixinEntity",
 		"MixinPlayerListLogin",
 		"MixinPlayerManager",
-		"MixinServerPlayer",
-		"PlayerListAccessor"
+		"MixinServerPlayer"
 	],
 	"injectors": {
 		"defaultRequire": 1
