@@ -9,7 +9,7 @@
 	],
 	"contact": {
 		"homepage": "https://github.com/DEAMJAVA/AntiLogout",
-		"sources": "https://github.com/FabricMC/AntiLogout"
+		"sources": "https://github.com/DEAMJAVA/AntiLogout"
 	},
 	"license": "GPLv3",
 	"icon": "assets/anti-logout/icon.png",
@@ -27,7 +27,7 @@
 
 	],
 	"depends": {
-		"fabricloader": ">=0.18.6",
+		"fabricloader": ">=0.19.1",
 		"minecraft": "~1.21.11",
 		"java": ">=21",
 		"fabric-api": "*",

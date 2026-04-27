@@ -1,6 +1,7 @@
 package net.deamjava.anti_logout.mixin;
 
 import net.deamjava.anti_logout.AntiLogout;
+import net.deamjava.anti_logout.CarpetHook;
 import net.deamjava.anti_logout.config.ConfigManager;
 import net.deamjava.anti_logout.manager.CombatTracker;
 import net.deamjava.anti_logout.manager.ILingeringPlayer;
@@ -41,6 +42,14 @@ public abstract class MixinPlayerManager {
         }
 
         UUID uuid = player.getUUID();
+
+        if (CarpetHook.INSTANCE.isFakePlayer(player)) {
+            if (debugLogs) {
+                AntiLogout.INSTANCE.getLogger().info("[anti-logout][debug] skipping lingering for carpet fake player name={} uuid={}",
+                        player.getName().getString(), uuid);
+            }
+            return;
+        }
 
         if (WhitelistManager.INSTANCE.isWhitelisted(uuid)) return;
 

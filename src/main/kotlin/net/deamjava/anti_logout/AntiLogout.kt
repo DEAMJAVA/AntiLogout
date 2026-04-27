@@ -20,6 +20,7 @@ object AntiLogout : ModInitializer {
 			logger.info("AntiLogout debug logging is enabled.")
 		}
 		WhitelistManager.load()
+		CarpetHook.tryInit()
 
 		CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
 			AloCommand.register(dispatcher)
