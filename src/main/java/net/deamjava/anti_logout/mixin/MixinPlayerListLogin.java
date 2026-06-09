@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -101,51 +102,71 @@ public abstract class MixinPlayerListLogin {
         boolean debugLogs = ConfigManager.INSTANCE.getConfig().getDebugLogs();
         long startNs = System.nanoTime();
         UUID uuid = player.getUUID();
+
         if (debugLogs) {
             AntiLogout.INSTANCE.getLogger().info("[anti-logout][debug] placeNewPlayer HEAD name={} uuid={}",
                     player.getName().getString(), uuid);
         }
+
         if (!LingeringPlayerManager.INSTANCE.isLingering(uuid)) return;
 
         ServerPlayer lingering = LingeringPlayerManager.INSTANCE.getLingeringPlayer(uuid);
         if (lingering == null) return;
 
-        if (debugLogs) {
-            AntiLogout.INSTANCE.getLogger().info("[anti-logout][debug] reconnect start name={} uuid={}",
-                    player.getName().getString(), uuid);
-        }
-
-        // Copy state before we touch anything
+        // Check if fabri-auth is managing this player's position/inventory.
+        // If so, skip copying lingering state — fabri-auth will restore them
+        // to the correct dimension and position via returnFromLimbo.
+        boolean limboManaged = false;
         try {
-            ProblemReporter.Collector reporter = new ProblemReporter.Collector();
-
-            TagValueOutput output = TagValueOutput.createWithContext(
-                    reporter,
-                    lingering.registryAccess()
-            );
-            lingering.saveWithoutId(output);
-
-            ValueInput input = TagValueInput.create(
-                    reporter,
-                    player.registryAccess(),
-                    output.buildResult()
-            );
-            player.load(input);
-
+            Class<?> compat = Class.forName("net.deamjava.anti_logout.compat.AntiLogoutCompat");
+            Method method = compat.getMethod("isManagedByLimbo", UUID.class);
+            limboManaged = (boolean) method.invoke(null, uuid);
+        } catch (ClassNotFoundException ignored) {
+            // fabri-auth is not installed, proceed normally
         } catch (Exception e) {
             AntiLogout.INSTANCE.getLogger().warn(
-                    "Failed to copy lingering state for " + player.getName().getString() + ": " + e.getMessage()
+                    "[anti-logout] AntiLogoutCompat check failed: " + e.getMessage());
+        }
+
+        if (debugLogs) {
+            AntiLogout.INSTANCE.getLogger().info("[anti-logout][debug] reconnect start name={} uuid={} limboManaged={}",
+                    player.getName().getString(), uuid, limboManaged);
+        }
+
+        if (!limboManaged) {
+            // Copy state from lingering ghost onto the reconnecting player
+            try {
+                ProblemReporter.Collector reporter = new ProblemReporter.Collector();
+
+                TagValueOutput output = TagValueOutput.createWithContext(
+                        reporter,
+                        lingering.registryAccess()
+                );
+                lingering.saveWithoutId(output);
+
+                ValueInput input = TagValueInput.create(
+                        reporter,
+                        player.registryAccess(),
+                        output.buildResult()
+                );
+                player.load(input);
+
+            } catch (Exception e) {
+                AntiLogout.INSTANCE.getLogger().warn(
+                        "Failed to copy lingering state for " + player.getName().getString() + ": " + e.getMessage()
+                );
+            }
+
+            player.snapTo(
+                    lingering.getX(),
+                    lingering.getY(),
+                    lingering.getZ(),
+                    lingering.getYRot(),
+                    lingering.getXRot()
             );
         }
 
-        player.snapTo(
-                lingering.getX(),
-                lingering.getY(),
-                lingering.getZ(),
-                lingering.getYRot(),
-                lingering.getXRot()
-        );
-
+        // Always clean up the lingering ghost regardless of limboManaged
         ReconnectTransferContext.INSTANCE.withAllowedLingeringRemoval(() -> {
             try {
                 ((PlayerList)(Object) this).remove(lingering);
@@ -172,5 +193,4 @@ public abstract class MixinPlayerListLogin {
                     player.getName().getString(), uuid, tookMs);
         }
     }
-
 }
