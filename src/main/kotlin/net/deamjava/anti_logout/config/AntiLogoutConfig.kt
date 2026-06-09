@@ -8,7 +8,11 @@ data class AntiLogoutConfig(
     val combatOnly: Boolean = false,
     val combatTimeout: Int = 30,
     val lingerDuration: Int = 60,
-    val debugLogs: Boolean = false
+    val debugLogs: Boolean = false,
+    val lingeringImmuneToMobs: Boolean = true,
+    val lingeringImmuneToPlayers: Boolean = false,
+    val lingeringAutoCrouch: Boolean = false,
+    val lingeringHideNameTag: Boolean = false
 )
 
 object ConfigManager {

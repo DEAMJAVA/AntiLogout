@@ -113,16 +113,13 @@ public abstract class MixinPlayerListLogin {
         ServerPlayer lingering = LingeringPlayerManager.INSTANCE.getLingeringPlayer(uuid);
         if (lingering == null) return;
 
-        // Check if fabri-auth is managing this player's position/inventory.
-        // If so, skip copying lingering state — fabri-auth will restore them
-        // to the correct dimension and position via returnFromLimbo.
+
         boolean limboManaged = false;
         try {
             Class<?> compat = Class.forName("net.deamjava.anti_logout.compat.AntiLogoutCompat");
             Method method = compat.getMethod("isManagedByLimbo", UUID.class);
             limboManaged = (boolean) method.invoke(null, uuid);
         } catch (ClassNotFoundException ignored) {
-            // fabri-auth is not installed, proceed normally
         } catch (Exception e) {
             AntiLogout.INSTANCE.getLogger().warn(
                     "[anti-logout] AntiLogoutCompat check failed: " + e.getMessage());
@@ -166,7 +163,6 @@ public abstract class MixinPlayerListLogin {
             );
         }
 
-        // Always clean up the lingering ghost regardless of limboManaged
         ReconnectTransferContext.INSTANCE.withAllowedLingeringRemoval(() -> {
             try {
                 ((PlayerList)(Object) this).remove(lingering);
