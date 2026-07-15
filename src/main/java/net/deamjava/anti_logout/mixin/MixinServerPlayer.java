@@ -74,13 +74,6 @@ public abstract class MixinServerPlayer implements ILingeringPlayer {
         }
     }
 
-    @Inject(method = "attack", at = @At("HEAD"))
-    private void antiLogout$onAttack(Entity target, CallbackInfo ci) {
-        if (target instanceof ServerPlayer) {
-            ServerPlayer self = (ServerPlayer)(Object) this;
-            CombatTracker.INSTANCE.recordHit(self);
-        }
-    }
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void antiLogout$tickHead(CallbackInfo ci) {

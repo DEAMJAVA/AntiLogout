@@ -5,6 +5,7 @@
   "mixins": [
     "MixinEntity",
     "MixinMob",
+    "MixinPlayer",
     "MixinPlayerListLogin",
     "MixinPlayerManager",
     "MixinServerPlayer",
